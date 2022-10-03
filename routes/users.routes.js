@@ -2,7 +2,13 @@ const express = require('express');
 
 // Controllers
 const {
-	getAllUsers
+	createUser,
+	detailsAnOrder,
+	disabledAccount,
+	getMyBuys,
+	getMyProducts,
+	login,
+	updateProfile
 } = require('../controllers/users.controller');
 
 // Middlewares
@@ -18,17 +24,16 @@ const {
 
 const usersRouter = express.Router();
 
-// usersRouter.post('/', createUserValidators, createUser);
-
-// usersRouter.post('/login', login);
+usersRouter.post('/', createUserValidators, createUser);
+usersRouter.post('/login', login);
 
 // Protecting below endpoints
-// usersRouter.use(protectSession);
+usersRouter.use(protectSession);
 
-usersRouter.get('/', getAllUsers);
-
-// usersRouter.patch('/:id', userExists, protectUsersAccount, updateUser);
-
-// usersRouter.delete('/:id', userExists, protectUsersAccount, deleteUser);
+usersRouter.get('/me', protectUsersAccount, getMyProducts);
+usersRouter.patch('/:id', userExists, protectUsersAccount, updateProfile);
+usersRouter.delete('/:id', userExists, protectUsersAccount, disabledAccount);
+usersRouter.get('/orders', protectUsersAccount, getMyBuys);
+usersRouter.get('/orders/:id', protectUsersAccount, detailsAnOrder);
 
 module.exports = { usersRouter };

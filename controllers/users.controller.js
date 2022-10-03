@@ -11,10 +11,40 @@ const { AppError } = require('../utils/appError.util');
 
 dotenv.config({ path: './config.env' });
 
-const getAllUsers = catchAsync(async (req, res, next) => {
+const createUser = catchAsync(async (req, res, next) => {
+	// block code
+});
+
+const login = catchAsync(async (req, res, next) => {
+	// block code
+});
+
+const getMyProducts = catchAsync(async (req, res, next) => {
+	// block code
+});
+
+const updateProfile = catchAsync(async (req, res, next) => {
+	// block code
+});
+
+const disabledAccount = catchAsync(async (req, res, next) => {
+	// block code
+});
+
+const getMyBuys = catchAsync(async (req, res, next) => {
+	// block code
+});
+
+const detailsAnOrder = catchAsync(async (req, res, next) => {
 	// block code
 });
 
 module.exports = {
-	getAllUsers
+	createUser,
+	login,
+	getMyProducts,
+	updateProfile,
+	disabledAccount,
+	getMyBuys,
+	detailsAnOrder
 };
