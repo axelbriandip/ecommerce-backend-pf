@@ -13,8 +13,7 @@ const Product = db.define('product', {
 	},
 	description: {
 		type: DataTypes.STRING,
-		allowNull: false,
-		unique: true,
+		allowNull: false
 	},
 	quantity: {
 		type: DataTypes.INTEGER,

@@ -2,24 +2,19 @@ const express = require('express');
 
 // Controllers
 const {
-    createCategory,
     createProduct,
     disabledProduct,
-    getCategoriesActives,
     getProduct,
     getProductsActives,
-    updateCategory,
     updateProduct
 } = require('../controllers/products.controller');
 
 // Middlewares
 const { productExists } = require('../middlewares/products.middlewares');
-const { categoryExists } = require('../middlewares/categories.middlewares');
 const {
 	protectSession,
 	protectUsersAccount,
     protectProductOwners,
-    protectCategoryOwners,
 	protectAdmin
 } = require('../middlewares/auth.middlewares');
 const {
@@ -28,16 +23,16 @@ const {
 
 const productsRouter = express.Router();
 
+// Utils
+const { upload } = require('../utils/multer.util');
+
 // Protecting below endpoints
 productsRouter.use(protectSession);
 
-productsRouter.post('/', createProductValidators, createProduct);
+productsRouter.post('/', upload.array('productImg', 5), createProduct);
 productsRouter.get('/', getProductsActives);
-productsRouter.get('/:id', getProduct);
+productsRouter.get('/:id', productExists, getProduct);
 productsRouter.patch('/:id', productExists, protectProductOwners, updateProduct);
 productsRouter.delete('/:id', productExists, protectProductOwners, disabledProduct);
-productsRouter.get('/categories', getCategoriesActives);
-productsRouter.post('/categories', createCategory);
-productsRouter.patch('/categories/:id', categoryExists, protectCategoryOwners, updateCategory);
 
 module.exports = { productsRouter };

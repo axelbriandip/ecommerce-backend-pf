@@ -7,10 +7,9 @@ const {
 } = require('firebase/storage');
 
 // Model
-const { PostImg } = require('../models/postImg.model');
+const { ProductImg } = require('../models/productImg.model');
 
 const dotenv = require('dotenv');
-
 dotenv.config({ path: './config.env' });
 
 const firebaseConfig = {
@@ -25,48 +24,54 @@ const firebaseApp = initializeApp(firebaseConfig);
 // Storage service
 const storage = getStorage(firebaseApp);
 
-const uploadPostImgs = async (imgs, postId) => {
+const uploadProductImgs = async (imgs, productId) => {
+	console.log('1');
 	// Map async -> Async operations with arrays
 	const imgsPromises = imgs.map(async img => {
+		console.log('2');
 		// Create firebase reference
-		const [originalName, ext] = img.originalname.split('.'); // -> [pug, jpg]
-
-		const filename = `posts/${postId}/${originalName}-${Date.now()}.${ext}`;
+		const [originalName, ext] = img.originalname.split('.');
+		console.log('3');
+		
+		const filename = `products/${productId}/${originalName}-${Date.now()}.${ext}`;
 		const imgRef = ref(storage, filename);
-
+		console.log('4');
+		
 		// Upload image to Firebase
 		const result = await uploadBytes(imgRef, img.buffer);
-
-		await PostImg.create({
-			postId,
+		console.log('5');
+		
+		await ProductImg.create({
+			productId,
 			imgUrl: result.metadata.fullPath,
 		});
+		console.log('6');
 	});
 
 	await Promise.all(imgsPromises);
 };
 
-const getPostsImgsUrls = async posts => {
-	// Loop through posts to get to the postImgs
-	const postsWithImgsPromises = posts.map(async post => {
+const getProductsImgsUrls = async products => {
+	// Loop through products to get to the productImgs
+	const productsWithImgsPromises = products.map(async product => {
 		// Get imgs URLs
-		const postImgsPromises = post.postImgs.map(async postImg => {
-			const imgRef = ref(storage, postImg.imgUrl);
+		const productImgsPromises = product.productImgs.map(async productImg => {
+			const imgRef = ref(storage, productImg.imgUrl);
 			const imgUrl = await getDownloadURL(imgRef);
 
-			postImg.imgUrl = imgUrl;
-			return postImg;
+			productImg.imgUrl = imgUrl;
+			return productImg;
 		});
 
 		// Resolve imgs urls
-		const postImgs = await Promise.all(postImgsPromises);
+		const productImgs = await Promise.all(productImgsPromises);
 
-		// Update old postImgs array with new array
-		post.postImgs = postImgs;
-		return post;
+		// Update old productImgs array with new array
+		product.productImgs = productImgs;
+		return product;
 	});
 
-	return await Promise.all(postsWithImgsPromises);
+	return await Promise.all(productsWithImgsPromises);
 };
 
-module.exports = { storage, uploadPostImgs, getPostsImgsUrls };
+module.exports = { storage, uploadProductImgs, getProductsImgsUrls };

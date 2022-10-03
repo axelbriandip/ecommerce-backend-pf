@@ -83,16 +83,6 @@ const protectProductOwners = (req, res, next) => {
 	next();
 };
 
-// Create middleware to protect category, only owners should be able to update/delete
-const protectCategoryOwners = (req, res, next) => {
-	const { sessionUser, category } = req;
-
-	if (sessionUser.id !== category.userId) {
-		return next(new AppError('This category does not belong to you.', 403));
-	}
-
-	next();
-};
 
 // Create middleware that only grants access to admin users
 const protectAdmin = (req, res, next) => {
@@ -110,6 +100,5 @@ module.exports = {
 	protectUsersAccount,
 	protectOrderOwners,
 	protectProductOwners,
-	protectCategoryOwners,
-	protectAdmin,
+	protectAdmin
 };

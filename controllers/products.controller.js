@@ -5,77 +5,46 @@ const dotenv = require('dotenv');
 // Models
 const { Product } = require('../models/product.model');
 const { Category } = require('../models/category.model');
-const { User } = require('../models/user.model');
-const { Cart } = require('../models/cart.model');
-const { ProductInCart } = require('../models/productInCart.model');
 
 // Utils
 const { catchAsync } = require('../utils/catchAsync.util');
 const { AppError } = require('../utils/appError.util');
+const { uploadProductImgs, getProductsImgsUrls } = require('../utils/firebase.util');
 
 dotenv.config({ path: './config.env' });
 
 const createProduct = catchAsync(async (req, res, next) => {
-	const { username, email, password, role } = req.body;
+	const { title, description, price, categoryId, quantity } = req.body;
+	const { sessionUser } = req;
 
-	if (role !== 'admin' && role !== 'normal') {
-		return next(new AppError('Invalid role', 400));
+    // search category
+	const category = await Category.findOne({ where: { id: categoryId } });
+
+    // if the category not exists..
+	if (!category) {
+		return next(new AppError('Category not found', 404));
 	}
 
-	// Encrypt the password
-	const salt = await bcrypt.genSalt(12);
-	const hashedPassword = await bcrypt.hash(password, salt);
-
-	const newUser = await User.create({
-		username,
-		email,
-		password: hashedPassword,
-		role
+    // if the category exists, continue..
+    const newProduct = await Product.create({
+		title,
+		description,
+        price,
+        categoryId,
+        quantity,
+		userId: sessionUser.id,
 	});
 
-	// Remove password from response
-	newUser.password = undefined;
+	await uploadProductImgs(req.files, newProduct.id);
 
-	// 201 -> Success and a resource has been created
 	res.status(201).json({
 		status: 'success',
-		data: { newUser },
+		data: { newProduct },
 	});
 });
 
 const getProductsActives = catchAsync(async (req, res, next) => {
-	// Get email and password from req.body
-	const { email, password } = req.body;
-
-	// Validate if the user exist with given email
-	const user = await User.findOne({
-		where: { email, status: 'active' },
-	});
-
-	// Compare passwords (entered password vs db password)
-	// If user doesn't exists or passwords doesn't match, send error
-	if (!user || !(await bcrypt.compare(password, user.password))) {
-		return next(new AppError('Wrong credentials', 400));
-	}
-
-	// Remove password from response
-	user.password = undefined;
-
-	// Generate JWT (payload, secretOrPrivateKey, options)
-	const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-		expiresIn: '30d',
-	});
-
-	res.status(200).json({
-		status: 'success',
-		data: { user, token },
-	});
-});
-
-const getProduct = catchAsync(async (req, res, next) => {
-	const { sessionUser } = req;
-
-	const products = await Product.findAll({ where: { userId: sessionUser.id } });
+	const products = await Product.findAll({ where: { status: 'active' } });
 
 	res.status(200).json({
 		status: 'success',
@@ -83,63 +52,67 @@ const getProduct = catchAsync(async (req, res, next) => {
 	});
 });
 
-const updateProduct = catchAsync(async (req, res, next) => {
-	const { username, email } = req.body;
-	const { user } = req;
-
-	// Method 1: Update by using the model
-	// await User.update({ username, email }, { where: { id } });
-
-	// Method 2: Update using a model's instance
-	await user.update({ username, email });
+const getProduct = catchAsync(async (req, res, next) => {
+	const { product } = req;
 
 	res.status(200).json({
 		status: 'success',
-		data: { user },
+		data: { product },
+	});
+});
+
+const updateProduct = catchAsync(async (req, res, next) => {
+	const { title, description, price, quantity } = req.body;
+	const { product } = req;
+
+	// Method 2: Update using a model's instance
+	await product.update({ title, description, price, quantity });
+
+	res.status(200).json({
+		status: 'success',
+		data: { product },
 	});
 });
 
 const disabledProduct = catchAsync(async (req, res, next) => {
-	const { user } = req;
+	const { product } = req;
 
 	// Method 3: Soft delete
-	await user.update({ status: 'disabled' });
+	await product.update({ status: 'disabled' });
 
 	res.status(204).json({ status: 'success' });
 });
 
 const getCategoriesActives = catchAsync(async (req, res, next) => {
-	const { sessionUser } = req;
-
-	const carts = await Cart.findAll({
-		where: {
-			userId: sessionUser.id,
-			status: 'purchased'
-		},
-		include: { model: ProductInCart }
-	});
+	const categories = await Category.findAll({ where: { status: 'active' } });
 
 	res.status(200).json({
 		status: 'success',
-		data: { carts },
+		data: { categories },
 	});
 });
 
 const createCategory = catchAsync(async (req, res, next) => {
-	const { order } = req;
+	const { name } = req.body;
 
-	res.status(200).json({
+	const newCategory = await Category.create({ name });
+
+	res.status(201).json({
 		status: 'success',
-		data: { order },
+		data: { newCategory },
 	});
 });
 
 const updateCategory = catchAsync(async (req, res, next) => {
-	const { order } = req;
+	const { name } = req.body;
+	const { category } = req;
+
+	// Method 2: Update using a model's instance
+	await category.update({ name });
 
 	res.status(200).json({
 		status: 'success',
-		data: { order },
+		data: { category },
 	});
 });
 
