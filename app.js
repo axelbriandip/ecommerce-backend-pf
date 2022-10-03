@@ -31,7 +31,7 @@ else if (process.env.NODE_ENV === 'production') app.use(morgan('combined'));
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/products', productsRouter);
 app.use('/api/v1/categories', categoriesRouter);
-app.use('/api/v1/cart', cartsRouter);
+app.use('/api/v1/carts', cartsRouter);
 
 // Global error handler
 app.use(globalErrorHandler);
