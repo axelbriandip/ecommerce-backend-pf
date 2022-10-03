@@ -1,19 +1,19 @@
 const { db, DataTypes } = require('../utils/database.util');
 
-const PostImg = db.define('postImg', {
+const ProductImg = db.define('productImg', {
 	id: {
 		primaryKey: true,
 		autoIncrement: true,
 		allowNull: false,
 		type: DataTypes.INTEGER,
 	},
-	postId: {
+    imgUrl: {
+        allowNull: false,
+        type: DataTypes.STRING,
+    },
+	productId: {
 		allowNull: false,
 		type: DataTypes.INTEGER,
-	},
-	imgUrl: {
-		allowNull: false,
-		type: DataTypes.STRING,
 	},
 	status: {
 		allowNull: false,
@@ -22,4 +22,4 @@ const PostImg = db.define('postImg', {
 	},
 });
 
-module.exports = { PostImg };
+module.exports = { ProductImg };

@@ -1,21 +1,22 @@
 const { db, DataTypes } = require('../utils/database.util');
 
-const Post = db.define('post', {
+const Order = db.define('order', {
 	id: {
 		type: DataTypes.INTEGER,
 		primaryKey: true,
 		autoIncrement: true,
 		allowNull: false,
 	},
-	title: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-	content: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
 	userId: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+	},
+	cartId: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+		unique: true,
+	},
+	totalPrice: {
 		type: DataTypes.INTEGER,
 		allowNull: false,
 	},
@@ -26,4 +27,4 @@ const Post = db.define('post', {
 	},
 });
 
-module.exports = { Post };
+module.exports = { Order };

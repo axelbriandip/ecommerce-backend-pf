@@ -1,28 +1,35 @@
 const { db, DataTypes } = require('../utils/database.util');
 
-const User = db.define('user', {
+const Product = db.define('product', {
 	id: {
 		type: DataTypes.INTEGER,
 		primaryKey: true,
 		autoIncrement: true,
 		allowNull: false,
 	},
-	username: {
+	title: {
 		type: DataTypes.STRING,
 		allowNull: false,
 	},
-	email: {
+	description: {
 		type: DataTypes.STRING,
 		allowNull: false,
 		unique: true,
 	},
-	password: {
-		type: DataTypes.STRING,
+	quantity: {
+		type: DataTypes.INTEGER,
 		allowNull: false,
 	},
-	role: {
-		type: DataTypes.STRING,
-		defaultValue: 'normal',
+	price: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+	},
+	categoryId: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+	},
+	userId: {
+		type: DataTypes.INTEGER,
 		allowNull: false,
 	},
 	status: {
@@ -32,4 +39,4 @@ const User = db.define('user', {
 	},
 });
 
-module.exports = { User };
+module.exports = { Product };

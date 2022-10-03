@@ -19,7 +19,7 @@ const db = new Sequelize({
 						required: true,
 						rejectUnauthorized: false,
 					},
-			  }
+			}
 			: {},
 });
 
