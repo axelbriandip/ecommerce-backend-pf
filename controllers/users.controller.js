@@ -7,6 +7,7 @@ const { User } = require('../models/user.model');
 const { Product } = require('../models/product.model');
 const { Cart } = require('../models/cart.model');
 const { ProductInCart } = require('../models/productInCart.model');
+const { Order } = require('../models/order.model');
 
 // Utils
 const { catchAsync } = require('../utils/catchAsync.util');
@@ -125,7 +126,12 @@ const getMyBuys = catchAsync(async (req, res, next) => {
 });
 
 const detailsAnOrder = catchAsync(async (req, res, next) => {
-	// block code
+	const { sessionUser, order } = req;
+
+	res.status(200).json({
+		status: 'success',
+		data: { order },
+	});
 });
 
 module.exports = {

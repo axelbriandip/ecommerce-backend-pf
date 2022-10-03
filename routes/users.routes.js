@@ -13,9 +13,11 @@ const {
 
 // Middlewares
 const { userExists } = require('../middlewares/users.middlewares');
+const { orderExists } = require('../middlewares/orders.middlewares');
 const {
 	protectSession,
 	protectUsersAccount,
+	protectOrderOwners,
 	protectAdmin
 } = require('../middlewares/auth.middlewares');
 const {
@@ -34,6 +36,6 @@ usersRouter.get('/me', protectUsersAccount, getMyProducts);
 usersRouter.patch('/:id', userExists, protectUsersAccount, updateProfile);
 usersRouter.delete('/:id', userExists, protectUsersAccount, disabledAccount);
 usersRouter.get('/orders', protectUsersAccount, getMyBuys);
-usersRouter.get('/orders/:id', protectUsersAccount, detailsAnOrder);
+usersRouter.get('/orders/:id', orderExists, protectOrderOwners, detailsAnOrder);
 
 module.exports = { usersRouter };

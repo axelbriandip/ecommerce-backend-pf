@@ -73,11 +73,11 @@ const protectPostsOwners = (req, res, next) => {
 };
 
 // Create middleware to protect comments, only owners should be able to update/delete
-const protectCommentsOwners = (req, res, next) => {
-	const { sessionUser, comment } = req;
+const protectOrderOwners = (req, res, next) => {
+	const { sessionUser, order } = req;
 
-	if (sessionUser.id !== comment.userId) {
-		return next(new AppError('This comment does not belong to you.', 403));
+	if (sessionUser.id !== order.userId) {
+		return next(new AppError('This order does not belong to you.', 403));
 	}
 
 	next();
@@ -97,7 +97,6 @@ const protectAdmin = (req, res, next) => {
 module.exports = {
 	protectSession,
 	protectUsersAccount,
-	protectPostsOwners,
-	protectCommentsOwners,
+	protectOrderOwners,
 	protectAdmin,
 };
