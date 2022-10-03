@@ -4,6 +4,9 @@ const dotenv = require('dotenv');
 
 // Models
 const { User } = require('../models/user.model');
+const { Product } = require('../models/product.model');
+const { Cart } = require('../models/cart.model');
+const { ProductInCart } = require('../models/productInCart.model');
 
 // Utils
 const { catchAsync } = require('../utils/catchAsync.util');
@@ -69,19 +72,56 @@ const login = catchAsync(async (req, res, next) => {
 });
 
 const getMyProducts = catchAsync(async (req, res, next) => {
-	// block code
+	const { sessionUser } = req;
+
+	const products = await Product.findAll({ where: { userId: sessionUser.id } });
+
+	res.status(200).json({
+		status: 'success',
+		data: { products },
+	});
 });
 
 const updateProfile = catchAsync(async (req, res, next) => {
-	// block code
+	const { username, email } = req.body;
+	const { user } = req;
+
+	// Method 1: Update by using the model
+	// await User.update({ username, email }, { where: { id } });
+
+	// Method 2: Update using a model's instance
+	await user.update({ username, email });
+
+	res.status(200).json({
+		status: 'success',
+		data: { user },
+	});
 });
 
 const disabledAccount = catchAsync(async (req, res, next) => {
-	// block code
+	const { user } = req;
+
+	// Method 3: Soft delete
+	await user.update({ status: 'disabled' });
+
+	res.status(204).json({ status: 'success' });
 });
 
 const getMyBuys = catchAsync(async (req, res, next) => {
-	// block code
+	const { sessionUser } = req;
+
+	const carts = await Cart.findAll({
+		where: {
+			userId: sessionUser.id,
+			status: 'purchased'
+		},
+		include: { model: ProductInCart }
+	});
+
+	res.status(200).json({
+		status: 'success',
+		data: { carts },
+	});
 });
 
 const detailsAnOrder = catchAsync(async (req, res, next) => {
