@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const { usersRouter } = require('./routes/users.routes');
 const { productsRouter } = require('./routes/products.routes');
 const { categoriesRouter } = require('./routes/categories.routes');
+const { cartsRouter } = require('./routes/carts.routes');
 
 // Controllers
 const { globalErrorHandler } = require('./controllers/error.controller');
@@ -30,6 +31,7 @@ else if (process.env.NODE_ENV === 'production') app.use(morgan('combined'));
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/products', productsRouter);
 app.use('/api/v1/categories', categoriesRouter);
+app.use('/api/v1/cart', cartsRouter);
 
 // Global error handler
 app.use(globalErrorHandler);
