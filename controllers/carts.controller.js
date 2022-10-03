@@ -136,10 +136,33 @@ const updateProductInCart = catchAsync(async (req, res, next) => {
     // if have stock
     const remainingQuantity = product.quantity - newQty;
     await product.update({ quantity: remainingQuantity });
+
+    // response
+	res.status(200).json({
+		status: 'success',
+		data: { productInCart },
+	});
 });
 
 const removeProductInCart = catchAsync(async (req, res, next) => {
-    // block code
+    const { productId } = req.params;
+
+    // search product active in cart
+    const productInCart = await ProductInCart.findOne({
+        where: {
+            productId,
+            status: 'active'
+        }
+    });
+
+    // if not have product active
+    if (!productInCart) {
+        return next(new AppError('the product not have in cart', 400));
+    }
+
+    await productInCart.update({ quantity: 0, status: 'removed' });
+
+    res.status(204).json({ status: 'success' });
 });
 
 const makePurcharse = catchAsync(async (req, res, next) => {
