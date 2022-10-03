@@ -57,12 +57,12 @@ const addProductToCart = catchAsync(async (req, res, next) => {
     if (productInCart) {
         return next(new AppError('Product is in the cart', 400));
     }
-
+    
     // cart removed exists in cart
     if (productInCartRemoved) {
         await productInCartRemoved.update({ status: 'active' });
     }
-
+    
     // If cart doesn't exist, create
 	if (!cart) {
         const newCart = await Cart.create({ userId: sessionUser.id })
@@ -95,7 +95,47 @@ const addProductToCart = catchAsync(async (req, res, next) => {
 });
 
 const updateProductInCart = catchAsync(async (req, res, next) => {
-    // block code
+    const { sessionUser } = req;
+    const { productId, newQty } = req.body;
+
+    // search if user have some cart active
+    const cart = await Cart.findOne({
+        where: {
+            userId: sessionUser.id,
+            status: 'active'
+        }
+    });
+
+    // if not have cart actives
+    if (!cart) {
+        return next(new AppError('the user not have cart active', 400));
+    }
+
+    // search product
+    const product = await Product.findOne({ where: { id: productId } });
+
+    // search product active in cart
+    const productInCart = await ProductInCart.findOne({
+        where: {
+            productId,
+            status: 'active'
+        }
+    });
+
+    if (newQty == 0) {
+        await productInCart.update({ status: 'removed' });
+    } else {
+        await productInCart.update({ status: 'active' });
+    }
+
+    // ¿exceed limit of stock?
+    if (product.quantity < newQty) {
+        return next(new AppError('Product limit exceeded', 400));
+    }
+
+    // if have stock
+    const remainingQuantity = product.quantity - newQty;
+    await product.update({ quantity: remainingQuantity });
 });
 
 const removeProductInCart = catchAsync(async (req, res, next) => {
