@@ -5,6 +5,7 @@ const morgan = require('morgan');
 
 // Routers
 const { usersRouter } = require('./routes/users.routes');
+const { productsRouter } = require('./routes/products.routes');
 
 // Controllers
 const { globalErrorHandler } = require('./controllers/error.controller');
@@ -26,6 +27,7 @@ else if (process.env.NODE_ENV === 'production') app.use(morgan('combined'));
 
 // Define endpoints
 app.use('/api/v1/users', usersRouter);
+app.use('/api/v1/products', productsRouter);
 
 // Global error handler
 app.use(globalErrorHandler);

@@ -61,23 +61,34 @@ const protectUsersAccount = (req, res, next) => {
 	next();
 };
 
-// Create middleware to protect posts, only owners should be able to update/delete
-const protectPostsOwners = (req, res, next) => {
-	const { sessionUser, post } = req;
-
-	if (sessionUser.id !== post.userId) {
-		return next(new AppError('This post does not belong to you.', 403));
-	}
-
-	next();
-};
-
-// Create middleware to protect comments, only owners should be able to update/delete
+// Create middleware to protect order, only owners should be able to update/delete
 const protectOrderOwners = (req, res, next) => {
 	const { sessionUser, order } = req;
 
 	if (sessionUser.id !== order.userId) {
 		return next(new AppError('This order does not belong to you.', 403));
+	}
+
+	next();
+};
+
+// Create middleware to protect product, only owners should be able to update/delete
+const protectProductOwners = (req, res, next) => {
+	const { sessionUser, product } = req;
+
+	if (sessionUser.id !== product.userId) {
+		return next(new AppError('This product does not belong to you.', 403));
+	}
+
+	next();
+};
+
+// Create middleware to protect category, only owners should be able to update/delete
+const protectCategoryOwners = (req, res, next) => {
+	const { sessionUser, category } = req;
+
+	if (sessionUser.id !== category.userId) {
+		return next(new AppError('This category does not belong to you.', 403));
 	}
 
 	next();
@@ -98,5 +109,7 @@ module.exports = {
 	protectSession,
 	protectUsersAccount,
 	protectOrderOwners,
+	protectProductOwners,
+	protectCategoryOwners,
 	protectAdmin,
 };
