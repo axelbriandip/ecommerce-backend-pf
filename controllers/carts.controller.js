@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 const { Cart } = require('../models/cart.model');
 const { ProductInCart } = require('../models/productInCart.model');
 const { Product } = require('../models/product.model');
+const { Order } = require('../models/order.model');
 
 // Utils
 const { catchAsync } = require('../utils/catchAsync.util');
@@ -32,10 +33,6 @@ const addProductToCart = catchAsync(async (req, res, next) => {
     if (product.quantity < quantity) {
         return next(new AppError('Product limit exceeded', 400));
     }
-
-    // if have stock
-    const remainingQuantity = product.quantity - quantity;
-    await product.update({ quantity: remainingQuantity });
 
     // search product active in cart
     const productInCart = await ProductInCart.findOne({
@@ -133,10 +130,6 @@ const updateProductInCart = catchAsync(async (req, res, next) => {
         return next(new AppError('Product limit exceeded', 400));
     }
 
-    // if have stock
-    const remainingQuantity = product.quantity - newQty;
-    await product.update({ quantity: remainingQuantity });
-
     // response
 	res.status(200).json({
 		status: 'success',
@@ -166,9 +159,72 @@ const removeProductInCart = catchAsync(async (req, res, next) => {
 });
 
 const makePurcharse = catchAsync(async (req, res, next) => {
-    // block code
-});
+    const { sessionUser } = req;
 
+    // search if user have some cart active
+    const cart = await Cart.findOne({
+        where: {
+            userId: sessionUser.id,
+            status: 'active'
+        },
+        include: {
+            model: ProductInCart,
+            where: { status: 'active' }
+        }
+    });
+
+    // if not have cart actives
+    if (!cart) {
+        return next(new AppError('the user not have cart active', 400));
+    }
+
+    const productInCart = await ProductInCart.findAll({
+        where: {
+            cartId: cart.id,
+            status: 'active'
+        }
+    })
+
+    var total = 0;
+    productInCart.map(async item => {
+        // search each product
+        const product = await Product.findOne({ where: { id: item.productId } })
+
+        // calc subtotal for each product
+        const subtotal = item.quantity * product.price;
+
+        // acumulate total price of cart
+        total =+ subtotal;
+
+        // if limit exceeded..
+        if (product.quantity < item.quantity) return next(new AppError('Product limit exceeded', 400));
+
+        // if not limit exceeded
+        const remainingQty = product.quantity - item.quantity;
+
+        // update quantity to product
+        await product.update({ quantity: remainingQty });
+
+        // mark product as 'purchased' in the cart
+        await item.update({ status: 'purchased' });
+    })
+    
+    // mark cart as 'purchased'
+    await cart.update({ status: 'purchased' });
+
+    // create order
+    const newOrder = await Order.create({
+        userId: sessionUser.id,
+        cartId: cart.id,
+        totalPrice: total
+	});
+
+    // 201 -> Success and a resource has been created
+	res.status(201).json({
+		status: 'success',
+		data: { newOrder },
+	});
+});
 
 module.exports = {
     addProductToCart,
