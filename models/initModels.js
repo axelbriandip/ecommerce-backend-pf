@@ -8,37 +8,36 @@ const { ProductImg } = require('./productImg.model');
 const { ProductInCart } = require('./productInCart.model');
 
 const initModels = () => {
-
-	// 1 User <----> M Order
-	User.hasMany(Order, { foreignKey: 'userId' });
+	// 1 User <--> M Order
+	User.hasMany(Order);
 	Order.belongsTo(User);
 	
-	// 1 User <----> 1 Cart
-	User.belongsTo(Cart);
+	// 1 User <--> 1 Cart
+	User.hasOne(Cart);
 	Cart.belongsTo(User);
 	
-	// 1 User <----> M Product
-	User.hasMany(Product, { foreignKey: 'userId' });
+	// 1 User <--> M Product
+	User.hasMany(Product);
 	Product.belongsTo(User);
 	
-	// 1 Order <----> 1 Cart
+	// 1 Order <--> 1 Cart
+	Cart.hasOne(Order);
 	Order.belongsTo(Cart);
-	Cart.belongsTo(Order);
-	
-	// 1 Product <----> M ProductImg
-	Product.hasMany(ProductImg, { foreignKey: 'productId' });
+
+	// 1 Product <--> M ProductImg
+	Product.hasMany(ProductImg);
 	ProductImg.belongsTo(Product);
 	
-	// 1 Product <----> 1 Category
+	// 1 Product <--> 1 Category
+	Category.hasOne(Product);
 	Product.belongsTo(Category);
-	Category.belongsTo(Product);
 	
-	// 1 Cart <----> M ProductInCart
-	Cart.hasMany(ProductInCart, { foreignKey: 'cartId' });
+	// 1 Cart <--> M ProductInCart
+	Cart.hasMany(ProductInCart);
 	ProductInCart.belongsTo(Cart);
 	
-	// 1 Product <----> 1 ProductInCart
-	Product.belongsTo(ProductInCart);
+	// 1 Product <--> 1 ProductInCart
+	Product.hasOne(ProductInCart);
 	ProductInCart.belongsTo(Product);
 };
 
