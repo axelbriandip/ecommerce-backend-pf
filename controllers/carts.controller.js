@@ -29,6 +29,11 @@ const addProductToCart = catchAsync(async (req, res, next) => {
     // search product
     const product = await Product.findOne({ where: { id: productId } });
 
+    // if product not exists
+    if (!product) {
+		return next(new AppError('Product not found', 404));
+	}
+
     // ¿exceed limit of stock?
     if (product.quantity < quantity) {
         return next(new AppError('Product limit exceeded', 400));
@@ -108,9 +113,6 @@ const updateProductInCart = catchAsync(async (req, res, next) => {
         return next(new AppError('the user not have cart active', 400));
     }
 
-    // search product
-    const product = await Product.findOne({ where: { id: productId } });
-
     // search product active in cart
     const productInCart = await ProductInCart.findOne({
         where: {
@@ -119,11 +121,19 @@ const updateProductInCart = catchAsync(async (req, res, next) => {
         }
     });
 
-    if (newQty == 0) {
-        await productInCart.update({ status: 'removed' });
-    } else {
-        await productInCart.update({ status: 'active' });
+    // if not have cart actives
+    if (!productInCart) {
+        return next(new AppError('the product not exists in a cart active', 400));
     }
+
+    if (newQty == 0) {
+        await productInCart.update({ quantity: newQty, status: 'removed' });
+    } else {
+        await productInCart.update({ quantity: newQty, status: 'active' });
+    }
+
+    // search product, for know if have stock required
+    const product = await Product.findOne({ where: { id: productId } });
 
     // ¿exceed limit of stock?
     if (product.quantity < newQty) {
@@ -194,7 +204,7 @@ const makePurcharse = catchAsync(async (req, res, next) => {
         const subtotal = item.quantity * product.price;
 
         // acumulate total price of cart
-        total =+ subtotal;
+        total += subtotal;
 
         // if limit exceeded..
         if (product.quantity < item.quantity) return next(new AppError('Product limit exceeded', 400));

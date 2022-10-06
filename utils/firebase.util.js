@@ -25,27 +25,21 @@ const firebaseApp = initializeApp(firebaseConfig);
 const storage = getStorage(firebaseApp);
 
 const uploadProductImgs = async (imgs, productId) => {
-	console.log('1');
 	// Map async -> Async operations with arrays
 	const imgsPromises = imgs.map(async img => {
-		console.log('2');
 		// Create firebase reference
 		const [originalName, ext] = img.originalname.split('.');
-		console.log('3');
 		
 		const filename = `products/${productId}/${originalName}-${Date.now()}.${ext}`;
 		const imgRef = ref(storage, filename);
-		console.log('4');
 		
 		// Upload image to Firebase
 		const result = await uploadBytes(imgRef, img.buffer);
-		console.log('5');
 		
 		await ProductImg.create({
 			productId,
 			imgUrl: result.metadata.fullPath,
 		});
-		console.log('6');
 	});
 
 	await Promise.all(imgsPromises);

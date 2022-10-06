@@ -127,9 +127,18 @@ const getMyBuys = catchAsync(async (req, res, next) => {
 const detailsAnOrder = catchAsync(async (req, res, next) => {
 	const { order } = req;
 
+	const productsInOrder = await ProductInCart.findAll({
+		where: { cartId: order.id },
+		attributes: [ 'productId', 'quantity' ],
+		include: {
+			model: Product,
+			attributes: [ 'title', 'price' ]
+		}
+	});
+
 	res.status(200).json({
 		status: 'success',
-		data: { order },
+		data: { order, productsInOrder },
 	});
 });
 
